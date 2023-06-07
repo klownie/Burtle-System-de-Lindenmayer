@@ -1,0 +1,12 @@
+[package]
+name = "les-systemes-de-lindenmayer"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = { version = "0.10.1", default-features = true, features = ["wayland"] }
+bevy_math = "0.10.1"
+lazy_static = "1.4.0"
+
