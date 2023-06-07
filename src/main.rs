@@ -2,19 +2,21 @@
 
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-/* use bevy_math::Deg; */
+use bevy_prototype_lyon::prelude::*;
 use std::collections::HashMap;
 
 const ALPHABET: [char; 1] = ['F'];
 const S: [char; 4] = ['+', '-', '[', ']'];
 const Þ: &str = "F";
 const P: [&'static str; 1] = ["F -> FF-[-F+F+F]+[+F-F-F]"];
-const ANGLE: f32 = 15.0;
-const ENTITY_SPEED: f32 = 250.0;
+const DERIVATION: usize = 3;
+const ANGLE: f32 = 25.7;
+const ENTITY_SPEED: f32 = 900.0;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugin(ShapePlugin)
         .add_startup_system(spawn_camera)
         .add_startup_system(spawn_turtle)
         .add_system(turtle_mouvement)
@@ -51,15 +53,16 @@ fn dessiner(mut turtle: &mut Turtle, angle: f32, pos: &mut Transform) {
     for character in turtle.instruction.chars() {
         remove_chars += 1;
         match character {
-            '+' => {
-                turtle.horizontale += angle;
-            }
-            '-' => {
-                turtle.horizontale -= angle;
-            }
+            '+' => turtle.horizontale += angle,
+
+            '-' => turtle.horizontale -= angle,
+
             '[' => turtle.pos_enregistre = (turtle.horizontale.clone(), pos.translation.clone()),
 
-            ']' => (turtle.horizontale, pos.translation) = turtle.pos_enregistre,
+            ']' => {
+                (turtle.horizontale, pos.translation) = turtle.pos_enregistre;
+                turtle.crayon = false
+            }
 
             _ => break,
         }
@@ -71,6 +74,7 @@ fn dessiner(mut turtle: &mut Turtle, angle: f32, pos: &mut Transform) {
 #[derive(Component)]
 pub struct Turtle {
     horizontale: f32,
+    crayon: bool,
     pos_enregistre: (f32, Vec3),
     instruction: String,
 }
@@ -91,13 +95,13 @@ pub fn spawn_turtle(
 ) {
     let window = window_query.get_single().unwrap();
     let mut þ = Þ.to_owned();
-    derive_iter(&mut þ, 3, &P);
+    derive_iter(&mut þ, DERIVATION, &P);
     commands.spawn((
         SpriteBundle {
             sprite: Sprite {
                 flip_x: false,
                 flip_y: false,
-                custom_size: Some(Vec2::new(100.0, 100.0)),
+                custom_size: Some(Vec2::new(50.0, 50.0)),
                 anchor: Default::default(),
                 ..default()
             },
@@ -107,6 +111,7 @@ pub fn spawn_turtle(
         },
         Turtle {
             horizontale: 0.0,
+            crayon: true,
             pos_enregistre: (
                 0.0,
                 Vec3::new(window.width() / 2.0, window.height() / 2.0, 0.0),
@@ -150,6 +155,7 @@ pub fn turtle_mouvement(
         transform.translation += direction * ENTITY_SPEED * time.delta_seconds();
 
         // Spawn a line segment entity
+        /*
         commands.spawn(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::new(2.0, 2.0)),
@@ -158,5 +164,21 @@ pub fn turtle_mouvement(
             transform: Transform::from_translation(old_position),
             ..default()
         });
+        */
+        if turtle.crayon {
+            let shape = shapes::Line(
+                Vec2::new(old_position.x, old_position.y),
+                Vec2::new(transform.translation.x, transform.translation.y),
+            );
+            commands.spawn((
+                ShapeBundle {
+                    path: GeometryBuilder::build_as(&shape),
+                    ..default()
+                },
+                Stroke::new(Color::BLACK, 1.0),
+            ));
+        } else {
+            turtle.crayon = true
+        }
     }
 }

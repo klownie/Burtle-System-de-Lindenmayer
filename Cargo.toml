@@ -7,6 +7,5 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.10.1", default-features = true, features = ["wayland"] }
-bevy_math = "0.10.1"
-lazy_static = "1.4.0"
+bevy_prototype_lyon = "0.8.0"
 
