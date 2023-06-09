@@ -8,13 +8,13 @@ use bevy::window::PrimaryWindow;
 use bevy_prototype_lyon::prelude::*;
 use std::collections::HashMap;
 
-const ALPHABET: [char; 1] = ['F'];
+const ALPHABET: [char; 2] = ['F', 'X'];
 const S: [char; 4] = ['+', '-', '[', ']'];
 const Þ: &str = "F";
-const P: [&'static str; 1] = ["F -> F-F++F-F"];
-const DERIVATION: usize = 6;
-const ANGLE: f32 = 60.0;
-const ENTITY_SPEED: f32 = 0.5;
+const P: [&'static str; 2] = ["F -> F+F-F-F+F+", "X -> F+X+F"];
+const DERIVATION: usize = 4;
+const ANGLE: f32 = 90.0;
+const ENTITY_SPEED: f32 = 5.5;
 
 fn main() {
     App::new()
@@ -98,7 +98,7 @@ pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Pr
     });
 }
 
-fn derive_iter<'a>(þ: &'a mut String, n: usize, p: &[&'static str; 1]) {
+fn derive_iter<'a>(þ: &'a mut String, n: usize, p: &[&'static str; 2]) {
     let mut rules: HashMap<char, String> = HashMap::new();
 
     for rule in p {
@@ -152,7 +152,6 @@ pub fn turtle_mouvement(
     for (mut transform, mut turtle) in turtle_query.iter_mut() {
         let direction;
 
-        println!("____________");
         dessiner(&mut turtle, ANGLE, transform.as_mut());
 
         direction = Vec3::new(
@@ -162,9 +161,7 @@ pub fn turtle_mouvement(
         );
 
         println!("chaine = {}", &turtle.instruction);
-        println!("turtle looking: {}", &turtle.horizontale);
-        println!("cord: {}", transform.translation);
-        println!("direction :{}", direction);
+
         let old_position = transform.translation.clone();
         transform.translation += direction * ENTITY_SPEED;
 
@@ -174,11 +171,7 @@ pub fn turtle_mouvement(
             Vec2::new(old_position.x, old_position.y),
             Vec2::new(transform.translation.x, transform.translation.y),
         );
-        println!(
-            "segment coord {},{}",
-            Vec2::new(old_position.x, old_position.y),
-            Vec2::new(transform.translation.x, transform.translation.y)
-        );
+
         commands.spawn((
             ShapeBundle {
                 path: GeometryBuilder::build_as(&shape),
@@ -186,7 +179,5 @@ pub fn turtle_mouvement(
             },
             Stroke::new(Color::BLACK, 2.0),
         ));
-
-        println!("____________");
     }
 }
