@@ -49,5 +49,5 @@ fn main() {
     let mut burtle = Burtle::new();
     burtle.pen_down();
     dessiner(&mut burtle, &þ, 60., 3.);
-    burtle.setup(1000., 1000.)
+    burtle.run(1000., 1000.)
 }
