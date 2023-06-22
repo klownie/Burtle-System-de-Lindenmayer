@@ -27,14 +27,19 @@ fn derive_iter<'a>(þ: &'a mut String, n: usize, p: &[&'static str; 2]) {
 
 fn dessiner(burtle: &mut Burtle, chaine: &String, angle: f32, length: f32) {
     for character in chaine.chars() {
+        burtle.wait(0);
         match character {
             '+' => burtle.right(angle),
 
             '-' => burtle.left(angle),
 
-            '[' => {}
+            '[' => burtle.set_waypoint(),
 
-            ']' => {}
+            ']' => {
+                burtle.pen_up();
+                burtle.goto_waypoint();
+                burtle.pen_down()
+            }
 
             _ => burtle.forward(length),
         }
@@ -43,11 +48,12 @@ fn dessiner(burtle: &mut Burtle, chaine: &String, angle: f32, length: f32) {
 
 fn main() {
     let mut þ = String::from("X");
-    let p = ["F -> X+F+X", "X -> F-X-F"];
-    derive_iter(&mut þ, 8, &p);
+    let p = ["X -> F[-X][X]F[-X]+FX", "F -> FF"];
+    derive_iter(&mut þ, 9, &p);
 
     let mut burtle = Burtle::new();
+    burtle.goto(0., 0.);
     burtle.pen_down();
-    dessiner(&mut burtle, &þ, 60., 3.);
-    burtle.run(1000., 1000.)
+    dessiner(&mut burtle, &þ, 25., 0.5);
+    burtle.run(1500., 1000.)
 }
